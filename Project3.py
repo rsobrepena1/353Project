@@ -24,7 +24,7 @@ engine = create_engine("postgresql+psycopg2://" + username + ":" + password +"@l
 class Base(DeclarativeBase):
     pass
 
-#Rumyr/Erick
+#Rumyr/Erick/Alexis
 class EMT(Base):
     __tablename__ = "emt"
 
@@ -35,11 +35,18 @@ class EMT(Base):
     coned_modules: Mapped[List["ConEd"]] = relationship(
         back_populates="emt", cascade="all, delete-orphan"
     )
+
+    transported_pID: Mapped[int] = mapped_column(Integer, ForeignKey("patient.pID"), nullable=True)
+    bPressure: Mapped[float] = mapped_column(Numeric(5,1), nullable=False)
+    pPulse: Mapped[int] = mapped_column(Integer, nullable=False)
+    oLevel: Mapped[float] = mapped_column(Numeric(5,1), nullable=False)
+
     patient: Mapped[List["Patient"]] = relationship(
         back_populates="emt", cascade="all, delete-orphan"
     )
     def __repr__(self) -> str:
-        return f"EMT(id={self.eID!r}, eName={self.eName!r})"
+        return f"EMT(id={self.eID!r}, eName={self.eName!r}), transported_pID={self.transported_pID},"
+        f"bPressure={self.bPressure}, pPulse={self.pPulse}, oLevel={self.oLevel})"
 
 #Rumyr
 class ConEd(Base):
@@ -100,17 +107,12 @@ class Patient(Base):
     pAddress: Mapped[str] = mapped_column(String(100))
     pNumber: Mapped[str] = mapped_column(String(50))
 
-    #TransportedBy Attributes, EXTENDING TABLE HERE NOT ADDING A NEW ONE
-    bPressure: Mapped[float] = mapped_column(Numeric)
-    pPulse: Mapped[float] = mapped_column(Numeric)
-    oLevel: Mapped[float] = mapped_column(Numeric)
-
     #Connection
     eID: Mapped[int] = mapped_column(Integer, ForeignKey("emt.eID"))
     emt: Mapped["EMT"] = relationship(back_populates="patient")
     
     def __repr__(self) -> str:
-        return f"Patient(pID={self.pID!r}, pName={self.pName!r}, vitals(bPressure, pPulse, oLevel) = [{self.bPressure}, {self.pPulse}, {self.oLevel}])"
+        return f"Patient(pID={self.pID!r}, pName={self.pName!r})"
 
 # Create tables
 Base.metadata.create_all(engine)
@@ -186,26 +188,27 @@ with Session(engine) as session:
         Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=8),
         Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=8)
     ]
-
+    #Erick
     patients = [
-        Patient(pID=1, pName='John Doe', pBirthDate=datetime(1985, 7, 12), pAddress='123 Maple St, Springfield, IL', pNumber='555-1234', bPressure=140.5, pPulse=72, oLevel=89.5, eID=1),
-        Patient(pID=2, pName='Jane Smith', pBirthDate=datetime(1990, 3, 25), pAddress='456 Oak St, Denver, CO', pNumber='555-5678', bPressure=150.0, pPulse=85, oLevel=93.0, eID=2),
-        Patient(pID=3, pName='Michael Johnson', pBirthDate=datetime(1978, 9, 14), pAddress='789 Pine St, Austin, TX', pNumber='555-9012', pPulse=68, oLevel=80.0, eID=3),
-        Patient(pID=4, pName='Emily Davis', pBirthDate=datetime(2000, 11, 30), pAddress='321 Birch St, Seattle, WA', pNumber='555-3456', bPressure=180.0, pPulse=90, oLevel=80.0, eID=4),
-        Patient(pID=5, pName='Daniel Brown', pBirthDate=datetime(1965, 5, 20), pAddress='654 Cedar St, Miami, FL', pNumber='555-7890', bPressure=155.0, pPulse=78, oLevel=89.5, eID=5),
-        Patient(pID=6, pName='Jessica Wilson', pBirthDate=datetime(1989, 8, 8), pAddress='987 Willow St, Boston, MA', pNumber='555-2345', bPressure=118.7, pPulse=70, oLevel=80.0, eID=7),
-        Patient(pID=7, pName='Matthew Martinez', pBirthDate=datetime(1995, 6, 15), pAddress='159 Elm St, Phoenix, AZ', pNumber='555-6789', bPressure=140.2, pPulse=82, oLevel=94.0, eID=7),
-        Patient(pID=8, pName='Sarah Taylor', pBirthDate=datetime(1972, 12, 5), pAddress='753 Fir St, Chicago, IL', pNumber='555-0123', bPressure=150.3, pPulse=98, oLevel=81.5, eID=8),
-        Patient(pID=9, pName='Christopher Anderson', pBirthDate=datetime(1983, 4, 22), pAddress='852 Redwood St, Portland, OR', pNumber='555-4567', bPressure=140.1, pPulse=76, oLevel=97.0, eID=9),
-        Patient(pID=10, pName='Amanda Thomas', pBirthDate=datetime(1998, 2, 10), pAddress='369 Spruce St, Dallas, TX', pNumber='555-8901', bPressure=130.0, pPulse=110, oLevel=95.5, eID=10),
-        Patient(pID=11, pName='Joshua White', pBirthDate=datetime(1976, 10, 17), pAddress='147 Cypress St, Atlanta, GA', pNumber='555-2346', bPressure=147.3, pPulse=72, oLevel=98.5, eID=11),
-        Patient(pID=12, pName='Olivia Harris', pBirthDate=datetime(1992, 7, 29), pAddress='258 Magnolia St, San Francisco, CA', pNumber='555-6780', bPressure=160.0, pPulse=95, oLevel=80.0, eID=12),
-        Patient(pID=13, pName='Jose Sanchez', pBirthDate=datetime(2002, 6, 19), pAddress='4128 Mulberry Lane, Springfield, IL 62704', pNumber='435-7781', bPressure=165.1, pPulse=97, oLevel=80.0, eID=13),
-        Patient(pID=14, pName='Maria Lopez', pBirthDate=datetime(1998, 11, 25), pAddress='720 Oak Street, Denver, CO 80203', pNumber='555-9821', bPressure=175.3, pPulse=101, oLevel=89.5, eID=14),
-        Patient(pID=15, pName='Juan Martinez', pBirthDate=datetime(2000, 7, 20), pAddress='20 Cooper Square, New York, NY', pNumber='542-5397', bPressure=180.0, pPulse=100, oLevel=89.1, eID=15),
-        Patient(pID=16, pName='Ethan Miller', pBirthDate=datetime(1985, 7, 12), pAddress='123 Maple St, Springfield, IL', pNumber='555-1234', bPressure=140.5, pPulse=72, oLevel=89.5, eID=16),
-        Patient(pID=17, pName='Lily Roberts', pBirthDate=datetime(1990, 3, 25), pAddress='456 Oak St, Denver, CO', pNumber='555-5678', bPressure=150.0, pPulse=85, oLevel=93.0, eID=17)
+        Patient(pID=1, pName='John Doe', pBirthDate=datetime(1985, 7, 12), pAddress='123 Maple St, Springfield, IL', pNumber='555-1234', eID=1),
+        Patient(pID=2, pName='Jane Smith', pBirthDate=datetime(1990, 3, 25), pAddress='456 Oak St, Denver, CO', pNumber='555-5678', eID=2),
+        Patient(pID=3, pName='Michael Johnson', pBirthDate=datetime(1978, 9, 14), pAddress='789 Pine St, Austin, TX', pNumber='555-9012', eID=3),
+        Patient(pID=4, pName='Emily Davis', pBirthDate=datetime(2000, 11, 30), pAddress='321 Birch St, Seattle, WA', pNumber='555-3456', eID=4),
+        Patient(pID=5, pName='Daniel Brown', pBirthDate=datetime(1965, 5, 20), pAddress='654 Cedar St, Miami, FL', pNumber='555-7890', eID=5),
+        Patient(pID=6, pName='Jessica Wilson', pBirthDate=datetime(1989, 8, 8), pAddress='987 Willow St, Boston, MA', pNumber='555-2345', eID=7),
+        Patient(pID=7, pName='Matthew Martinez', pBirthDate=datetime(1995, 6, 15), pAddress='159 Elm St, Phoenix, AZ', pNumber='555-6789', eID=7),
+        Patient(pID=8, pName='Sarah Taylor', pBirthDate=datetime(1972, 12, 5), pAddress='753 Fir St, Chicago, IL', pNumber='555-0123', eID=8),
+        Patient(pID=9, pName='Christopher Anderson', pBirthDate=datetime(1983, 4, 22), pAddress='852 Redwood St, Portland, OR', pNumber='555-4567', eID=9),
+        Patient(pID=10, pName='Amanda Thomas', pBirthDate=datetime(1998, 2, 10), pAddress='369 Spruce St, Dallas, TX', pNumber='555-8901', eID=10),
+        Patient(pID=11, pName='Joshua White', pBirthDate=datetime(1976, 10, 17), pAddress='147 Cypress St, Atlanta, GA', pNumber='555-2346', eID=11),
+        Patient(pID=12, pName='Olivia Harris', pBirthDate=datetime(1992, 7, 29), pAddress='258 Magnolia St, San Francisco, CA', pNumber='555-6780', eID=12),
+        Patient(pID=13, pName='Jose Sanchez', pBirthDate=datetime(2002, 6, 19), pAddress='4128 Mulberry Lane, Springfield, IL 62704', pNumber='435-7781', eID=13),
+        Patient(pID=14, pName='Maria Lopez', pBirthDate=datetime(1998, 11, 25), pAddress='720 Oak Street, Denver, CO 80203', pNumber='555-9821', eID=14),
+        Patient(pID=15, pName='Juan Martinez', pBirthDate=datetime(2000, 7, 20), pAddress='20 Cooper Square, New York, NY', pNumber='542-5397', eID=15),
+        Patient(pID=16, pName='Ethan Miller', pBirthDate=datetime(1985, 7, 12), pAddress='123 Maple St, Springfield, IL', pNumber='555-1234', eID=16),
+        Patient(pID=17, pName='Lily Roberts', pBirthDate=datetime(1990, 3, 25), pAddress='456 Oak St, Denver, CO', pNumber='555-5678', eID=17)
     ]
+
 
     session.add_all(emts + modules + dispatchers + facilities, patients)
     session.commit()
