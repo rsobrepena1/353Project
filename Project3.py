@@ -71,6 +71,20 @@ class Facility(Base):
 
     dID: Mapped[int] = mapped_column(ForeignKey("dispatch.dID"))
     dispatch: Mapped[Dispatch] = relationship("Dispatch", back_populates="facilities")
+    
+#Alexis 
+class ambulance(Base):
+    __tablename__ = "ambulance"
+   
+    rNumber: Mapped[int] = mapped_column(Integer, primary_key=True)  #Primary Key
+    lCheck: Mapped[str] = mapped_column(Date, nullable=False)  
+    mAge: Mapped[int] = mapped_column(Integer, nullable=False)  
+    equipment: Mapped[str] = mapped_column(String(100), nullable=False) 
+    emt: Mapped[List["emt"]] = relationship(back_populates="ambulance", cascade="all, delete-orphan")
+    
+     def __repr__(self) -> str:
+        return f"Ambulance(rNumber={self.rNumber!r}, equipment={self.equipment!r}, lCheck={self.lCheck!r}, mAge={self.mAge!r})"
+
 
 # Create tables
 Base.metadata.create_all(engine)
