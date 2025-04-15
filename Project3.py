@@ -23,7 +23,7 @@ engine = create_engine("postgresql+psycopg2://" + username + ":" + password +"@l
 class Base(DeclarativeBase):
     pass
 
-#Rumyr
+#Rumyr/Erick
 class EMT(Base):
     __tablename__ = "emt"
 
@@ -32,6 +32,9 @@ class EMT(Base):
     eLOC: Mapped[int] = mapped_column(Integer)
     eWage: Mapped[float] = mapped_column(Numeric(5, 2))
     coned_modules: Mapped[List["ConEd"]] = relationship(
+        back_populates="emt", cascade="all, delete-orphan"
+    )
+    patient: Mapped[List["Patient"]] = relationship(
         back_populates="emt", cascade="all, delete-orphan"
     )
     def __repr__(self) -> str:
@@ -82,9 +85,31 @@ class ambulance(Base):
     equipment: Mapped[str] = mapped_column(String(100), nullable=False) 
     emt: Mapped[List["emt"]] = relationship(back_populates="ambulance", cascade="all, delete-orphan")
     
-     def __repr__(self) -> str:
+    def __repr__(self) -> str:
         return f"Ambulance(rNumber={self.rNumber!r}, equipment={self.equipment!r}, lCheck={self.lCheck!r}, mAge={self.mAge!r})"
 
+#Erick
+class Patient(Base):
+    __tablename__ = "patient"
+
+    #Attributes
+    pID: Mapped[int] = mapped_column(Integer, primary_key=True)
+    pName: Mapped[str] = mapped_column(String(40))
+    pBirthDate: Mapped[datetime] = mapped_column(DateTime)
+    pAddress: Mapped[str] = mapped_column(String(100))
+    pNumber: Mapped[str] = mapped_column(String(50))
+
+    #TransportedBy Attributes, EXTENDING TABLE HERE NOT ADDING A NEW ONE
+    bPressure: Mapped[float] = mapped_column(Numeric)
+    pPulse: Mapped[float] = mapped_column(Numeric)
+    oLevel: Mapped[float] = mapped_column(Numeric)
+
+    #Connection
+    eID: Mapped[int] = mapped_column(Integer, ForeignKey("emt.eID"))
+    emt: Mapped["EMT"] = relationship(back_populates="patient")
+    
+    def __repr__(self) -> str:
+        return f"Patient(pID={self.pID!r}, pName={self.pName!r}, vitals(bPressure, pPulse, oLevel) = [{self.bPressure}, {self.pPulse}, {self.oLevel}])"
 
 # Create tables
 Base.metadata.create_all(engine)
@@ -92,81 +117,81 @@ Base.metadata.create_all(engine)
 # Insert Data
 with Session(engine) as session:
 #Rumyr
-emts = [
-    EMT(eID=1, eLOC=2, eName='Regan, Bracken', eWage=30.15),
-    EMT(eID=2, eLOC=1, eName='Park, Grant', eWage=42.00),
-    EMT(eID=3, eLOC=3, eName='Rogers, Steve', eWage=35.50),
-    EMT(eID=4, eLOC=2, eName='Stark, Tony', eWage=50.00),
-    EMT(eID=5, eLOC=1, eName='Romanoff, Natasha', eWage=45.00),
-    EMT(eID=6, eLOC=3, eName='Banner, Bruce', eWage=40.75),
-    EMT(eID=7, eLOC=2, eName='Odinson, Thor', eWage=60.00),
-    EMT(eID=8, eLOC=1, eName='Barton, Clint', eWage=38.25),
-    EMT(eID=9, eLOC=2, eName='Parker, Peter', eWage=30.00),
-    EMT(eID=10, eLOC=3, eName='Maximoff, Wanda', eWage=42.43),
-    EMT(eID=11, eLOC=2, eName='Strange, Doctor', eWage=32.00),
-    EMT(eID=12, eLOC=1, eName='TChalla, King', eWage=24.00),
-    EMT(eID=13, eLOC=3, eName='Danvers, Carol', eWage=30.00),
-    EMT(eID=14, eLOC=3, eName='Jerry, Tom', eWage=28.75),
-    EMT(eID=15, eLOC=1, eName='Barnes, Bucky', eWage=36.50),
-    EMT(eID=16, eLOC=3, eName='Wilson, Sam', eWage=40.50),
-    EMT(eID=17, eLOC=3, eName='Carter, Peggy', eWage=38.00)
-    ]
-#Rumyr
+    emts = [
+        EMT(eID=1, eLOC=2, eName='Regan, Bracken', eWage=30.15),
+        EMT(eID=2, eLOC=1, eName='Park, Grant', eWage=42.00),
+        EMT(eID=3, eLOC=3, eName='Rogers, Steve', eWage=35.50),
+        EMT(eID=4, eLOC=2, eName='Stark, Tony', eWage=50.00),
+        EMT(eID=5, eLOC=1, eName='Romanoff, Natasha', eWage=45.00),
+        EMT(eID=6, eLOC=3, eName='Banner, Bruce', eWage=40.75),
+        EMT(eID=7, eLOC=2, eName='Odinson, Thor', eWage=60.00),
+        EMT(eID=8, eLOC=1, eName='Barton, Clint', eWage=38.25),
+        EMT(eID=9, eLOC=2, eName='Parker, Peter', eWage=30.00),
+        EMT(eID=10, eLOC=3, eName='Maximoff, Wanda', eWage=42.43),
+        EMT(eID=11, eLOC=2, eName='Strange, Doctor', eWage=32.00),
+        EMT(eID=12, eLOC=1, eName='TChalla, King', eWage=24.00),
+        EMT(eID=13, eLOC=3, eName='Danvers, Carol', eWage=30.00),
+        EMT(eID=14, eLOC=3, eName='Jerry, Tom', eWage=28.75),
+        EMT(eID=15, eLOC=1, eName='Barnes, Bucky', eWage=36.50),
+        EMT(eID=16, eLOC=3, eName='Wilson, Sam', eWage=40.50),
+        EMT(eID=17, eLOC=3, eName='Carter, Peggy', eWage=38.00)
+        ]
+    #Rumyr
     modules = [
-    ConEd(mID=1, mName='Stroke Care', mDate=date(2025, 3, 21), cDate=date(2025, 3, 21), eID=1),
-    ConEd(mID=2, mName='Respiratory Issues', mDate=date(2025, 3, 22), cDate=date(2025, 3, 22), eID=2),
-    ConEd(mID=3, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=3),
-    ConEd(mID=4, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=4),
-    ConEd(mID=5, mName='Trauma Care', mDate=date(2025, 3, 25), cDate=date(2025, 3, 25), eID=5),
-    ConEd(mID=6, mName='Motor Vehicle Collisions', mDate=date(2025, 3, 26), cDate=date(2025, 3, 26), eID=6),
-    ConEd(mID=7, mName='Dementia', mDate=date(2025, 3, 27), cDate=date(2025, 3, 27), eID=7),
-    ConEd(mID=8, mName='Work Safety', mDate=date(2025, 3, 28), cDate=date(2025, 3, 28), eID=8),
-    ConEd(mID=9, mName='Obstetrics', mDate=date(2025, 3, 29), cDate=date(2025, 3, 29), eID=9),
-    ConEd(mID=10, mName='Stroke Care', mDate=date(2025, 3, 21), cDate=date(2025, 3, 21), eID=10),
-    ConEd(mID=11, mName='Respiratory Issues', mDate=date(2025, 3, 22), cDate=date(2025, 3, 22), eID=11),
-    ConEd(mID=12, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=12),
-    ConEd(mID=13, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=13)
-    ]
-#Ethan
+        ConEd(mID=1, mName='Stroke Care', mDate=date(2025, 3, 21), cDate=date(2025, 3, 21), eID=1),
+        ConEd(mID=2, mName='Respiratory Issues', mDate=date(2025, 3, 22), cDate=date(2025, 3, 22), eID=2),
+        ConEd(mID=3, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=3),
+        ConEd(mID=4, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=4),
+        ConEd(mID=5, mName='Trauma Care', mDate=date(2025, 3, 25), cDate=date(2025, 3, 25), eID=5),
+        ConEd(mID=6, mName='Motor Vehicle Collisions', mDate=date(2025, 3, 26), cDate=date(2025, 3, 26), eID=6),
+        ConEd(mID=7, mName='Dementia', mDate=date(2025, 3, 27), cDate=date(2025, 3, 27), eID=7),
+        ConEd(mID=8, mName='Work Safety', mDate=date(2025, 3, 28), cDate=date(2025, 3, 28), eID=8),
+        ConEd(mID=9, mName='Obstetrics', mDate=date(2025, 3, 29), cDate=date(2025, 3, 29), eID=9),
+        ConEd(mID=10, mName='Stroke Care', mDate=date(2025, 3, 21), cDate=date(2025, 3, 21), eID=10),
+        ConEd(mID=11, mName='Respiratory Issues', mDate=date(2025, 3, 22), cDate=date(2025, 3, 22), eID=11),
+        ConEd(mID=12, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=12),
+        ConEd(mID=13, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=13)
+        ]
+    #Ethan
     dispatchers = [
-    Dispatch(dID=1, dName='Claus, Santa', dWage=30.00),
-    Dispatch(dID=2, dName='Frost, Jack', dWage=28.50),
-    Dispatch(dID=3, dName='Iverson, Allen', dWage=26.90),
-    Dispatch(dID=4, dName='Bees, Apple', dWage=24.50),
-    Dispatch(dID=5, dName='Doe, John', dWage=27.00),
-    Dispatch(dID=6, dName='Smith, Terry', dWage=28.00),
-    Dispatch(dID=7, dName='Black, Jack', dWage=29.00),
-    Dispatch(dID=8, dName='Man, Iron', dWage=32.00)
-]
-#Ethan
-facilities = [
-    Facility(fName='North Hospital', fAddress='123 Smith St', fNumber=101, dID=1),
-    Facility(fName='Valley General Hospital', fAddress='101 Valley Rd', fNumber=109, dID=1),
-    Facility(fName='Mountain Rescue Base', fAddress='567 Pine Rd', fNumber=106, dID=1),
+        Dispatch(dID=1, dName='Claus, Santa', dWage=30.00),
+        Dispatch(dID=2, dName='Frost, Jack', dWage=28.50),
+        Dispatch(dID=3, dName='Iverson, Allen', dWage=26.90),
+        Dispatch(dID=4, dName='Bees, Apple', dWage=24.50),
+        Dispatch(dID=5, dName='Doe, John', dWage=27.00),
+        Dispatch(dID=6, dName='Smith, Terry', dWage=28.00),
+        Dispatch(dID=7, dName='Black, Jack', dWage=29.00),
+        Dispatch(dID=8, dName='Man, Iron', dWage=32.00)
+    ]
+    #Ethan
+    facilities = [
+        Facility(fName='North Hospital', fAddress='123 Smith St', fNumber=101, dID=1),
+        Facility(fName='Valley General Hospital', fAddress='101 Valley Rd', fNumber=109, dID=1),
+        Facility(fName='Mountain Rescue Base', fAddress='567 Pine Rd', fNumber=106, dID=1),
 
-    Facility(fName='East Ambulance Service', fAddress='456 State Ave', fNumber=102, dID=2),
-    Facility(fName='Coastal Ambulance Service', fAddress='345 Beach Ave', fNumber=110, dID=2),
-    Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=2),
+        Facility(fName='East Ambulance Service', fAddress='456 State Ave', fNumber=102, dID=2),
+        Facility(fName='Coastal Ambulance Service', fAddress='345 Beach Ave', fNumber=110, dID=2),
+        Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=2),
 
-    Facility(fName='South Response Station', fAddress='789 Tree Rd', fNumber=103, dID=3),
-    Facility(fName='Clearwater EMS Base', fAddress='111 Clearwater Dr', fNumber=114, dID=3),
-    Facility(fName='Lakeview Medical Center', fAddress='890 Oak Blvd', fNumber=107, dID=3),
+        Facility(fName='South Response Station', fAddress='789 Tree Rd', fNumber=103, dID=3),
+        Facility(fName='Clearwater EMS Base', fAddress='111 Clearwater Dr', fNumber=114, dID=3),
+        Facility(fName='Lakeview Medical Center', fAddress='890 Oak Blvd', fNumber=107, dID=3),
 
-    Facility(fName='West Fire Department', fAddress='135 W Brown Ave', fNumber=104, dID=4),
-    Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=4),
+        Facility(fName='West Fire Department', fAddress='135 W Brown Ave', fNumber=104, dID=4),
+        Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=4),
 
-    Facility(fName='Central Care Center', fAddress='246 Main St', fNumber=105, dID=5),
-    Facility(fName='Golden Gate Medical', fAddress='321 Gate Dr', fNumber=113, dID=5),
+        Facility(fName='Central Care Center', fAddress='246 Main St', fNumber=105, dID=5),
+        Facility(fName='Golden Gate Medical', fAddress='321 Gate Dr', fNumber=113, dID=5),
 
-    Facility(fName='Riverbend EMS Station', fAddress='234 River Rd', fNumber=108, dID=6),
+        Facility(fName='Riverbend EMS Station', fAddress='234 River Rd', fNumber=108, dID=6),
 
-    Facility(fName='Redwood Health Facility', fAddress='222 Redwood St', fNumber=115, dID=7),
-    Facility(fName='Lakeview Medical Center', fAddress='890 Oak Blvd', fNumber=107, dID=7),
+        Facility(fName='Redwood Health Facility', fAddress='222 Redwood St', fNumber=115, dID=7),
+        Facility(fName='Lakeview Medical Center', fAddress='890 Oak Blvd', fNumber=107, dID=7),
 
-    Facility(fName='Seaside Ambulance Center', fAddress='333 Seaside Rd', fNumber=116, dID=8),
-    Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=8),
-    Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=8)
-]
+        Facility(fName='Seaside Ambulance Center', fAddress='333 Seaside Rd', fNumber=116, dID=8),
+        Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=8),
+        Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=8)
+    ]
 
 
     session.add_all(emts + modules + dispatchers + facilities + ambulance)
