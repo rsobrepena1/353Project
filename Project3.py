@@ -188,6 +188,7 @@ with Session(engine) as session:
         Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=8),
         Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=8)
     ]
+
     #Erick
     patients = [
         Patient(pID=1, pName='John Doe', pBirthDate=datetime(1985, 7, 12), pAddress='123 Maple St, Springfield, IL', pNumber='555-1234', eID=1),
