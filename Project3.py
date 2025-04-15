@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy import Numeric
 from sqlalchemy import DateTime
-from sqlalchemy import date
 from datetime import datetime
 
 username = "postgres"
@@ -54,8 +53,8 @@ class ConEd(Base):
   
     mID: Mapped[int] = mapped_column(Integer, primary_key=True)
     mName: Mapped[str] = mapped_column(String(50))
-    mDate: Mapped[datetime] = mapped_column(Date)
-    cDate: Mapped[datetime] = mapped_column(Date)
+    mDate: Mapped[datetime] = mapped_column(DateTime)
+    cDate: Mapped[datetime] = mapped_column(DateTime)
     eID: Mapped[int] = mapped_column(ForeignKey("emt.eID"))
     emt: Mapped["EMT"] = relationship(back_populates="coned_modules")
     def __repr__(self) -> str:
@@ -84,14 +83,14 @@ class Facility(Base):
     dispatch: Mapped[Dispatch] = relationship("Dispatch", back_populates="facilities")
     
 #Alexis 
-class ambulance(Base):
+class Ambulance(Base):
     __tablename__ = "ambulance"
    
     rNumber: Mapped[int] = mapped_column(Integer, primary_key=True)  #Primary Key
     lCheck: Mapped[str] = mapped_column(DateTime, nullable=False)  
     mAge: Mapped[int] = mapped_column(Integer, nullable=False)  
     equipment: Mapped[str] = mapped_column(String(100), nullable=False) 
-    emt: Mapped[List["emt"]] = relationship(back_populates="ambulance", cascade="all, delete-orphan")
+    emt: Mapped[List["EMT"]] = relationship(back_populates="ambulance", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
         return f"Ambulance(rNumber={self.rNumber!r}, equipment={self.equipment!r}, lCheck={self.lCheck!r}, mAge={self.mAge!r})"
@@ -141,20 +140,20 @@ with Session(engine) as session:
         ]
     #Rumyr
     modules = [
-        ConEd(mID=1, mName='Stroke Care', mDate=date(2025, 3, 21), cDate=date(2025, 3, 21), eID=1),
-        ConEd(mID=2, mName='Respiratory Issues', mDate=date(2025, 3, 22), cDate=date(2025, 3, 22), eID=2),
-        ConEd(mID=3, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=3),
-        ConEd(mID=4, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=4),
-        ConEd(mID=5, mName='Trauma Care', mDate=date(2025, 3, 25), cDate=date(2025, 3, 25), eID=5),
-        ConEd(mID=6, mName='Motor Vehicle Collisions', mDate=date(2025, 3, 26), cDate=date(2025, 3, 26), eID=6),
-        ConEd(mID=7, mName='Dementia', mDate=date(2025, 3, 27), cDate=date(2025, 3, 27), eID=7),
-        ConEd(mID=8, mName='Work Safety', mDate=date(2025, 3, 28), cDate=date(2025, 3, 28), eID=8),
-        ConEd(mID=9, mName='Obstetrics', mDate=date(2025, 3, 29), cDate=date(2025, 3, 29), eID=9),
-        ConEd(mID=10, mName='Stroke Care', mDate=date(2025, 3, 21), cDate=date(2025, 3, 21), eID=10),
-        ConEd(mID=11, mName='Respiratory Issues', mDate=date(2025, 3, 22), cDate=date(2025, 3, 22), eID=11),
-        ConEd(mID=12, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=12),
-        ConEd(mID=13, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=13)
-        ]
+        ConEd(mID=1, mName='Stroke Care', mDate=datetime(2025, 3, 21), cDate=datetime(2025, 3, 21), eID=1),
+        ConEd(mID=2, mName='Respiratory Issues', mDate=datetime(2025, 3, 22), cDate=datetime(2025, 3, 22), eID=2),
+        ConEd(mID=3, mName='Cardiac Problems', mDate=datetime(2025, 3, 23), cDate=datetime(2025, 3, 23), eID=3),
+        ConEd(mID=4, mName='Psychiatric Safety', mDate=datetime(2025, 3, 24), cDate=datetime(2025, 3, 24), eID=4),
+        ConEd(mID=5, mName='Trauma Care', mDate=datetime(2025, 3, 25), cDate=datetime(2025, 3, 25), eID=5),
+        ConEd(mID=6, mName='Motor Vehicle Collisions', mDate=datetime(2025, 3, 26), cDate=datetime(2025, 3, 26), eID=6),
+        ConEd(mID=7, mName='Dementia', mDate=datetime(2025, 3, 27), cDate=datetime(2025, 3, 27), eID=7),
+        ConEd(mID=8, mName='Work Safety', mDate=datetime(2025, 3, 28), cDate=datetime(2025, 3, 28), eID=8),
+        ConEd(mID=9, mName='Obstetrics', mDate=datetime(2025, 3, 29), cDate=datetime(2025, 3, 29), eID=9),
+        ConEd(mID=10, mName='Stroke Care', mDate=datetime(2025, 3, 21), cDate=datetime(2025, 3, 21), eID=10),
+        ConEd(mID=11, mName='Respiratory Issues', mDate=datetime(2025, 3, 22), cDate=datetime(2025, 3, 22), eID=11),
+        ConEd(mID=12, mName='Cardiac Problems', mDate=datetime(2025, 3, 23), cDate=datetime(2025, 3, 23), eID=12),
+        ConEd(mID=13, mName='Psychiatric Safety', mDate=datetime(2025, 3, 24), cDate=datetime(2025, 3, 24), eID=13)
+    ]
     #Ethan
     dispatchers = [
         Dispatch(dID=1, dName='Claus, Santa', dWage=30.00),
@@ -211,7 +210,7 @@ with Session(engine) as session:
     ]
 
 
-    session.add_all(emts + modules + dispatchers + facilities, patients)
+    session.add_all(emts + modules + dispatchers + facilities + patients)
     session.commit()
 
 
