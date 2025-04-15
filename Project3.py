@@ -96,7 +96,6 @@ with Session(engine) as session:
 
 with Session(engine) as session:
 #Query: Module Completion and EMTs (Rumyr)
-    print("## JOIN QUERY: EMTs and their Completed Modules ##")
     stmt = (
         select(EMT.eName, ConEd.mName, ConEd.cDate)
         .join(ConEd)
