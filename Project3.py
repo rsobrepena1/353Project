@@ -245,17 +245,16 @@ with Session(engine) as session:
 
 
     #Query TrainingPay - Alexis Fenderson
-    stmt = (
-    select(
-        EMT.eID, EMT.eName,
-        func.count(Completes.mID).label("Total Courses Completed"),
-        ConEd.mName.label("Most Recent Course"),
-        EMT.eWage.label("Hourly Wage")
+     stmt = (
+    select(EMT.eID, EMT.eName,
+        func.count(ConEd.mID).label("Courses Completed"),
+        ConEd.mName.label("Recent Course"),
+        EMT.eWage.label("Wages")
     )
-        .join(Completes, EMT.eID == Completes.eID)  
-        .join(ConEd, Completes.mID == ConEd.mID)  
+        .join(ConEd, EMT.eID == ConEd.eID) 
         .group_by(EMT.eID, EMT.eName, EMT.eWage, ConEd.mName)
-        .order_by(func.count(Completes.mID).desc())  
+        .order_by(func.count(ConEd.mID).desc())  
+
     )
 
         results = session.execute(stmt).all()
