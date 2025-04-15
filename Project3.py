@@ -244,6 +244,7 @@ with Session(engine) as session:
         print(f"{dName} (ID {dID}) coordinates with {count} facilities")
 
 
+    #Query TrainingPay - Alexis Fenderson
     stmt = (
     select(
         EMT.eID, EMT.eName,
