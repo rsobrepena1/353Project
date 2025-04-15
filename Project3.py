@@ -242,3 +242,22 @@ with Session(engine) as session:
 
     for (dID, dName), count in dispatcher_facility_counts.items():
         print(f"{dName} (ID {dID}) coordinates with {count} facilities")
+
+
+    stmt = (
+    select(
+        EMT.eID, EMT.eName,
+        func.count(Completes.mID).label("Total Courses Completed"),
+        ConEd.mName.label("Most Recent Course"),
+        EMT.eWage.label("Hourly Wage")
+    )
+        .join(Completes, EMT.eID == Completes.eID)  
+        .join(ConEd, Completes.mID == ConEd.mID)  
+        .group_by(EMT.eID, EMT.eName, EMT.eWage, ConEd.mName)
+        .order_by(func.count(Completes.mID).desc())  
+    )
+
+        results = session.execute(stmt).all()
+
+        for row in results:
+        print(row)
