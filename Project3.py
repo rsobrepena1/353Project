@@ -169,7 +169,7 @@ facilities = [
 ]
 
 
-    session.add_all(emts + modules + dispatchers + facilities)
+    session.add_all(emts + modules + dispatchers + facilities + ambulance)
     session.commit()
 
 
