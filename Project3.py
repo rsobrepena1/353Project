@@ -56,7 +56,7 @@ Base.metadata.create_all(engine)
 # Insert Data
 with Session(engine) as session:
 #Rumyr
-    emts = [
+emts = [
     EMT(eID=1, eLOC=2, eName='Regan, Bracken', eWage=30.15),
     EMT(eID=2, eLOC=1, eName='Park, Grant', eWage=42.00),
     EMT(eID=3, eLOC=3, eName='Rogers, Steve', eWage=35.50),
@@ -70,8 +70,10 @@ with Session(engine) as session:
     EMT(eID=11, eLOC=2, eName='Strange, Doctor', eWage=32.00),
     EMT(eID=12, eLOC=1, eName='TChalla, King', eWage=24.00),
     EMT(eID=13, eLOC=3, eName='Danvers, Carol', eWage=30.00),
-    EMT(eID=14, eLOC=3, eName='Wilson, Sam', eWage=28.75),
-    EMT(eID=15, eLOC=1, eName='Barnes, Bucky', eWage=36.50)
+    EMT(eID=14, eLOC=3, eName='Jerry, Tom', eWage=28.75),
+    EMT(eID=15, eLOC=1, eName='Barnes, Bucky', eWage=36.50),
+    EMT(eID=16, eLOC=3, eName='Wilson, Sam', eWage=40.50),
+    EMT(eID=17, eLOC=3, eName='Carter, Peggy', eWage=38.00)
     ]
 #Rumyr
     modules = [
