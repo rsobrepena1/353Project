@@ -50,6 +50,28 @@ class ConEd(Base):
     def __repr__(self) -> str:
         return f"ConEd(id={self.mID!r}, mName={self.mName!r}, cDate={self.cDate!r}, eID={self.eID!r})"
 
+#Ethan
+class Dispatch(Base):
+    __tablename__ = 'dispatch'
+
+    dID: Mapped[int] = mapped_column(primary_key=True)
+    dName: Mapped[str] = mapped_column(String, nullable=False)
+    dWage: Mapped[Numeric] = mapped_column(Numeric, nullable=False)
+
+    facilities: Mapped[list["Facility"]] = relationship("Facility", back_populates="dispatch")
+
+#Ethan
+class Facility(Base):
+    __tablename__ = 'facility'
+
+    fID: Mapped[int] = mapped_column(primary_key=True)
+    fName: Mapped[str] = mapped_column(String, nullable=False)
+    fAddress: Mapped[str] = mapped_column(String, nullable=False)
+    fNumber: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    dID: Mapped[int] = mapped_column(ForeignKey("dispatch.dID"))
+    dispatch: Mapped[Dispatch] = relationship("Dispatch", back_populates="facilities")
+
 # Create tables
 Base.metadata.create_all(engine)
 
@@ -91,6 +113,47 @@ emts = [
     ConEd(mID=12, mName='Cardiac Problems', mDate=date(2025, 3, 23), cDate=date(2025, 3, 23), eID=12),
     ConEd(mID=13, mName='Psychiatric Safety', mDate=date(2025, 3, 24), cDate=date(2025, 3, 24), eID=13)
     ]
+#Ethan
+    dispatchers = [
+    Dispatch(dID=1, dName='Claus, Santa', dWage=30.00),
+    Dispatch(dID=2, dName='Frost, Jack', dWage=28.50),
+    Dispatch(dID=3, dName='Iverson, Allen', dWage=26.90),
+    Dispatch(dID=4, dName='Bees, Apple', dWage=24.50),
+    Dispatch(dID=5, dName='Doe, John', dWage=27.00),
+    Dispatch(dID=6, dName='Smith, Terry', dWage=28.00),
+    Dispatch(dID=7, dName='Black, Jack', dWage=29.00),
+    Dispatch(dID=8, dName='Man, Iron', dWage=32.00)
+]
+#Ethan
+facilities = [
+    Facility(fName='North Hospital', fAddress='123 Smith St', fNumber=101, dID=1),
+    Facility(fName='Valley General Hospital', fAddress='101 Valley Rd', fNumber=109, dID=1),
+    Facility(fName='Mountain Rescue Base', fAddress='567 Pine Rd', fNumber=106, dID=1),
+
+    Facility(fName='East Ambulance Service', fAddress='456 State Ave', fNumber=102, dID=2),
+    Facility(fName='Coastal Ambulance Service', fAddress='345 Beach Ave', fNumber=110, dID=2),
+    Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=2),
+
+    Facility(fName='South Response Station', fAddress='789 Tree Rd', fNumber=103, dID=3),
+    Facility(fName='Clearwater EMS Base', fAddress='111 Clearwater Dr', fNumber=114, dID=3),
+    Facility(fName='Lakeview Medical Center', fAddress='890 Oak Blvd', fNumber=107, dID=3),
+
+    Facility(fName='West Fire Department', fAddress='135 W Brown Ave', fNumber=104, dID=4),
+    Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=4),
+
+    Facility(fName='Central Care Center', fAddress='246 Main St', fNumber=105, dID=5),
+    Facility(fName='Golden Gate Medical', fAddress='321 Gate Dr', fNumber=113, dID=5),
+
+    Facility(fName='Riverbend EMS Station', fAddress='234 River Rd', fNumber=108, dID=6),
+
+    Facility(fName='Redwood Health Facility', fAddress='222 Redwood St', fNumber=115, dID=7),
+    Facility(fName='Lakeview Medical Center', fAddress='890 Oak Blvd', fNumber=107, dID=7),
+
+    Facility(fName='Seaside Ambulance Center', fAddress='333 Seaside Rd', fNumber=116, dID=8),
+    Facility(fName='Sunset Health Center', fAddress='456 Sunset Blvd', fNumber=111, dID=8),
+    Facility(fName='Hilltop Rescue Station', fAddress='789 Hill Rd', fNumber=112, dID=8)
+]
+
 
     session.add_all(emts + modules)
     session.commit()
@@ -106,3 +169,21 @@ with Session(engine) as session:
 
     for eName, mName, cDate in results:
         print(f"EMT: {eName}, Module: {mName}, Completion Date: {cDate}")
+
+# Query: DispatcherFacilityCount (Ethan); prints dispatchers by name and id, and the count of facilities that they coordinate with
+    stmt = (
+        select(Dispatch.dID, Dispatch.dName, Facility.fName)
+        .join(Facility, Dispatch.dID == Facility.dID)
+    )
+
+    results = session.execute(stmt).all()
+
+    dispatcher_facility_counts = {}
+    for row in results:
+        dID, dName, fName = row
+        if (dID, dName) not in dispatcher_facility_counts:
+            dispatcher_facility_counts[(dID, dName)] = 0
+        dispatcher_facility_counts[(dID, dName)] += 1
+
+    for (dID, dName), count in dispatcher_facility_counts.items():
+        print(f"{dName} (ID {dID}) coordinates with {count} facilities")
